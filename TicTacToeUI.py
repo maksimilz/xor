@@ -474,6 +474,85 @@ class TicTacToeGame(BoxLayout):
         # Добавляем контейнер с таймерами в боковое меню
         side_menu.add_widget(timers_container)
         
+        # Создаем контейнер для счета с красивым дизайном
+        score_container = BoxLayout(
+            orientation='vertical',
+            size_hint_y=None,
+            height=dp(100),
+            padding=[dp(10), dp(5)],
+            spacing=dp(10)
+        )
+        
+        # Добавляем заголовок "СЧЁТ"
+        score_title = Label(
+            text="СЧЁТ",
+            size_hint_y=None,
+            height=dp(30),
+            font_size=dp(18),
+            color=(0.8, 0.8, 0.8, 1)
+        )
+        score_container.add_widget(score_title)
+        
+        # Контейнер для счета игроков
+        score_box = BoxLayout(
+            spacing=dp(20),
+            size_hint_y=None,
+            height=dp(50)
+        )
+        
+        # Счет для X
+        x_score_container = BoxLayout(
+            orientation='vertical',
+            spacing=dp(5)
+        )
+        x_score_label = Label(
+            text="X",
+            font_size=dp(24),
+            color=(1, 0.28, 0.34, 1),
+            bold=True
+        )
+        self.x_points_label = Label(
+            text="0",
+            font_size=dp(20),
+            color=(1, 0.28, 0.34, 1)
+        )
+        x_score_container.add_widget(x_score_label)
+        x_score_container.add_widget(self.x_points_label)
+        
+        # Разделитель
+        separator = Label(
+            text=":",
+            font_size=dp(24),
+            color=(0.8, 0.8, 0.8, 1)
+        )
+        
+        # Счет для O
+        o_score_container = BoxLayout(
+            orientation='vertical',
+            spacing=dp(5)
+        )
+        o_score_label = Label(
+            text="O",
+            font_size=dp(24),
+            color=(0.18, 0.83, 0.45, 1),
+            bold=True
+        )
+        self.o_points_label = Label(
+            text="0",
+            font_size=dp(20),
+            color=(0.18, 0.83, 0.45, 1)
+        )
+        o_score_container.add_widget(o_score_label)
+        o_score_container.add_widget(self.o_points_label)
+        
+        # Собираем все вместе
+        score_box.add_widget(x_score_container)
+        score_box.add_widget(separator)
+        score_box.add_widget(o_score_container)
+        score_container.add_widget(score_box)
+        
+        side_menu.add_widget(score_container)
+        
         # Добавляем метку для сообщения о победителе под счётом
         self.result_label = Label(
             text="",
@@ -483,15 +562,6 @@ class TicTacToeGame(BoxLayout):
             color=(1, 1, 1, 0)  # Начально невидимый
         )
         side_menu.add_widget(self.result_label)
-        
-        # Счёт
-        self.score_label = Label(
-            text=f"X: {self.game_logic.points['X']} | O: {self.game_logic.points['O']}",
-            size_hint_y=None,
-            height=dp(30),
-            font_size=dp(20)
-        )
-        side_menu.add_widget(self.score_label)
         
         # Добавляем разделитель
         side_menu.add_widget(Widget(size_hint_y=None, height=dp(20)))
@@ -566,17 +636,45 @@ class TicTacToeGame(BoxLayout):
 
     def update_score(self):
         """Обновление счета с анимацией"""
-        old_text = self.score_label.text
-        new_text = f"X: {self.game_logic.points['X']} | O: {self.game_logic.points['O']}"
+        # Обновляем значения
+        x_points = str(self.game_logic.points['X'])
+        o_points = str(self.game_logic.points['O'])
         
-        if old_text != new_text:
-            # Анимация обновления счета
-            anim = (
-                Animation(font_size=dp(24), duration=0.1) +
-                Animation(font_size=dp(20), duration=0.1)
+        # Анимация для X
+        if self.x_points_label.text != x_points:
+            original_font_size = self.x_points_label.font_size
+            anim_x = (
+                Animation(
+                    opacity=0,
+                    font_size=original_font_size * 1.5,
+                    duration=0.15
+                ) +
+                Animation(
+                    opacity=1,
+                    font_size=original_font_size,
+                    duration=0.15
+                )
             )
-            self.score_label.text = new_text
-            anim.start(self.score_label)
+            self.x_points_label.text = x_points
+            anim_x.start(self.x_points_label)
+        
+        # Анимация для O
+        if self.o_points_label.text != o_points:
+            original_font_size = self.o_points_label.font_size
+            anim_o = (
+                Animation(
+                    opacity=0,
+                    font_size=original_font_size * 1.5,
+                    duration=0.15
+                ) +
+                Animation(
+                    opacity=1,
+                    font_size=original_font_size,
+                    duration=0.15
+                )
+            )
+            self.o_points_label.text = o_points
+            anim_o.start(self.o_points_label)
 
     def show_game_over(self, winner):
         """Показ окончания игры с анимацией"""
@@ -799,8 +897,8 @@ class StartMenu(BoxLayout):
         side_container = BoxLayout(
             orientation='vertical',
             size_hint_y=None,
-            height=dp(100),
-            spacing=dp(10)
+            height=dp(110),
+            spacing=dp(6)
         )
         side_label = Label(
             text="Выберите сторону:",
@@ -811,12 +909,14 @@ class StartMenu(BoxLayout):
         self.x_button = Button(
             text="X",
             font_size=dp(30),
-            background_color=(1, 0.28, 0.34, 1)
+            background_color=(1, 0.28, 0.34, 1),
+            size_hint_x=0.8  # Увеличиваем ширину кнопки
         )
         self.o_button = Button(
             text="O",
-            font_size=dp(30),
-            background_color=(0.18, 0.83, 0.45, 1)
+            font_size=dp(35),
+            background_color=(0.18, 0.83, 0.45, 1),
+            size_hint_x=0.8  # Увеличиваем ширину кнопки
         )
         
         self.x_button.bind(on_press=lambda x: self.select_side('X'))
@@ -827,6 +927,9 @@ class StartMenu(BoxLayout):
         
         side_container.add_widget(side_label)
         side_container.add_widget(side_buttons)
+        
+        side_container.add_widget(Widget())
+        
         self.add_widget(side_container)
 
         # Контейнер для выбора сложности
